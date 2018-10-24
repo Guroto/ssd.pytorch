@@ -8,7 +8,9 @@ import torchvision.transforms as transforms
 import cv2
 import numpy as np
 
+# path = os.path.split(os.path.realpath(__file__))[0]
 COCO_ROOT = osp.join(HOME, 'data/coco/')
+# COCO_ROOT = path + "/coco"
 IMAGES = 'images'
 ANNOTATIONS = 'annotations'
 COCO_API = 'PythonAPI'
