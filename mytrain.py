@@ -1,4 +1,4 @@
-from data import *
+from data import config, voc0712, __init__
 from utils.augmentations import SSDAugmentation
 from layers.modules import MultiBoxLoss
 from ssd import build_ssd
@@ -27,7 +27,7 @@ viz = visdom.Visdom()
 learning_rate = 1e-3
 gamma = 0.1
 cuda_flag = True
-voc_dataset = VOC_ROOT
+voc_dataset = voc0712.VOC_ROOT
 
 def xavier(param):
     init.xavier_uniform(param)
@@ -39,16 +39,7 @@ def weights_init(m):
         m.bias.data.zero_()
 
 def create_vis_plot(_xlabel, _ylabel, _title, _legend):
-    return viz.line(
-        X=torch.zeros((1,)).cpu(),
-        Y=torch.zeros((1, 3)).cpu(),
-        opts=dict(
-            xlabel=_xlabel,
-            ylabel=_ylabel,
-            title=_title,
-            legend=_legend
-        )
-    )
+    return viz.line(torch.zeros((1, 3)).cpu(), X=torch.zeros((1,)).cpu(), opts=dict(xlabel=_xlabel, ylabel=_ylabel, title=_title, legend=_legend))
 
 def update_vis_plot(iteration, loc, conf, window1, window2, update_type,
                     epoch_size=1):
@@ -80,8 +71,8 @@ def adjust_learning_rate(optimizer, gamma, step):
 
 def train():
     dataset_root = "data/"
-    cfg = voc
-    dataset = VOCDetection(root=dataset_root, transform=SSDAugmentation(cfg["min_dim"], MEANS))
+    cfg = config.voc
+    dataset = voc0712.VOCDetection(root=dataset_root, transform=SSDAugmentation(cfg["min_dim"], config.MEANS))
     viz = visdom.Visdom()
 
     ssd_net = build_ssd("train", cfg["min_dim"], cfg["num_classes"])
@@ -125,7 +116,7 @@ def train():
         iter_plot = create_vis_plot('Iteration', 'Loss', vis_title, vis_legend)
         epoch_plot = create_vis_plot('Epoch', 'Loss', vis_title, vis_legend)
 
-    data_loader = data.DataLoader(dataset, 32, num_workers=4, shuffle=True, collate_fn=detection_collate, pin_memory=True)
+    data_loader = data.DataLoader(dataset, 32, num_workers=4, shuffle=True, collate_fn=__init__.detection_collate, pin_memory=True)
 
     # create batch iterator
     batch_iterator = iter(data_loader)
@@ -180,6 +171,10 @@ def train():
                        repr(iteration) + '.pth')
         torch.save(ssd_net.state_dict(),
                    save_folder + '' + voc_dataset + '.pth')
+
+
+if __name__ == "__main__":
+    train()
 
 
 
